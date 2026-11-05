@@ -29,7 +29,36 @@ jobs:
       - name: Extract project
         run: |
           unzip -q MarketPro.zip -d source
-          find source -name settings.gradle.kts
+
+      - name: Fix Java and Kotlin targets
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path("source/MarketPro/app/build.gradle.kts")
+          s = p.read_text()
+
+          marker = "    buildFeatures {"
+
+          patch = """    compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_17
+                  targetCompatibility = JavaVersion.VERSION_17
+              }
+
+              kotlinOptions {
+                  jvmTarget = "17"
+              }
+
+          """
+
+          if "sourceCompatibility = JavaVersion.VERSION_17" not in s:
+              if marker not in s:
+                  raise SystemExit("Could not find buildFeatures in app/build.gradle.kts")
+              s = s.replace(marker, patch + marker, 1)
+
+          p.write_text(s)
+          print("Java and Kotlin targets set to 17")
+          PY
 
       - name: Build APK
         run: |
