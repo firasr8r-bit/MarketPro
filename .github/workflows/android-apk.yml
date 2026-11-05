@@ -7,23 +7,29 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract project
-        run: |
-          unzip -q MarketPro.zip -d source
-          find source -name settings.gradle.kts
-
-      - name: Setup Java
+      - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
+      - name: Setup Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
       - name: Setup Android
         uses: android-actions/setup-android@v4
+
+      - name: Extract project
+        run: |
+          unzip -q MarketPro.zip -d source
+          find source -name settings.gradle.kts
 
       - name: Build APK
         run: |
